@@ -45,6 +45,12 @@ var JsLoader = window.JsLoader = (function (window, document) {
     }
   }
 
+  /**
+  * Fetch the script described by its path and configuration,
+  * and set a new promise to detect the load completion
+  * @param root The full path to the js file
+  * @param config The object describing the fetch configuration
+  */
   function _fetch (root, config) {
     if(!config) {
       config = { src: "" };   // Set default fetch config
