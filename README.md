@@ -7,11 +7,11 @@ JsLoader is a utility tool that helps to dynamically load Javascript file in a D
 
 This module is certainly a must-have in any of these situations:
 
- + You have a lot of script dependencies, but you are tired of writting billions of `<script>` tag in your `.html`
+ + You have a lot of script dependencies, but you are tired of writing billions of `<script>` tag in your `.html`
 
  + You need to load new Javascript source at runtime
 
- + The url / path to your dependencies is unknoww before a specific `.js` file is loaded
+ + The url / path to your dependencies is unknown before a specific `.js` file is loaded
 
 
 It aims to avoid this kind of **nightmare**:
@@ -46,12 +46,12 @@ That's it, you are ready to use the `JsLoader` class.
 
 ## Features
 
-It provide a static class named `JsLoader`, associated with a single public methods named `load()`
+It provides a static class named `JsLoader`, associated with a single public method named `load()`
 
 The `load()` method allows to load JS files described *however* you want: a single String, an Array of String, an Object structured as a file tree (see the [examples](#code-example)).  
-You can also mix any of the previous data structure, it (should) works too: an Array of Objects, an Object composed of Array and String, an Array of Arrays...
+You can also mix any of the previous data structures, it (should) works too: an Array of Objects, an Object composed of Array and String, an Array of Arrays...
 
-It return a new `Promise` containing every loaded script, so you can chain it easily.
+It returns a new `Promise` containing every loaded script, so you can chain it easily.
 
 ## Code Example
 
@@ -89,7 +89,7 @@ JsLoader.load([
 
 #### Object
 
-This structure can be used to avoid writting repetitively the path to a directory. The keys of the object will be used as directory name, until a final `String` value is reached.
+This structure can be used to avoid writing repetitively the path to a directory. The keys of the object will be used as directory name, until a final `String` value is reached.
 
 ```js
 JsLoader.load({
@@ -101,7 +101,7 @@ JsLoader.load({
 });
 ```
 
-There is also too specific key that can be used: `"."` and `"?"`.
+There are also two specific keys that can be used: `"."` and `"?"`.
 
 
 The `"."` key is used to indicate the current directory in the file tree.
@@ -116,9 +116,9 @@ JsLoader.load({
 });
 ```
 
-The `"?"` key is used to configurate the file to load. It should at least specify the `src` of the file, relative to the file tree.
+The `"?"` key is used to configure the file to load. It should at least specify the `src` of the file, relative to the file tree.
 
-The full configuration is as follow:
+The full configuration is as follows:
 
  + `src`: String, path to the file, relative to the file tree position. **REQUIRED**
  + `id`: String, ID of the file to query it later (**query not implemented**)
@@ -146,7 +146,7 @@ JsLoader.load({
 
 #### Mixin
 
-You can also mix any of the previous data structure !
+You can also mix any of the previous data structures!
 
 ```js
 JsLoader.load({
@@ -164,7 +164,7 @@ JsLoader.load({
 });
 ```
 
-Mix **more** !
+Mix **more**!
 
 ```js
 
@@ -195,7 +195,7 @@ letters/e.js, letters/f/g.js, letters/f/h.js
 
 ### Chain Execution
 
-The `load()` function return a `Promise`, that can be used to wait for the loading to finish.
+The `load()` function returns a `Promise`, that can be used to wait for the loading to finish.
 
 ```js
 JsLoader.load({...}).then(function () {
