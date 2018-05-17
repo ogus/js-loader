@@ -9,9 +9,33 @@ var JsLoader = window.JsLoader = (function (window, document) {
   * @param data The data to load (a String, or an Array, or an Object, or any combinations of those)
   * @param func The callback to apply
   */
-  function load (data, func) {
+  function load(data, func) {
     _load("", data);
     return Promise.all(promise_list);
+  }
+
+  /**
+  * Public function to request a javascript files.
+  * If the file has not been loaded in the cache, return the cached value,
+  * otherwise fetch the script synchronously
+  * @param key The full path or the ID of the requested file
+  */
+  function require(key) {
+    if(typeof(key) !== "string") {
+      return;
+    }
+
+    if (cache[key]) {
+      return Promise.resolve(cache[key]);
+    }
+    else {
+      return Promise.resolve(
+        _fetch("", {
+          src: key,
+          async: false
+        })
+      );
+    }
   }
 
   /**
@@ -19,9 +43,9 @@ var JsLoader = window.JsLoader = (function (window, document) {
   * @param path The path the current data, progressively concatenated
   * @param func The data to load (recursive concatenation of all path)
   */
-  function _load (path, data) {
+  function _load(path, data) {
     if (typeof(data) === "string") {
-      _fetch(path+data);  // fetch data
+      promise_list.push( _fetch(path+data) );   // fetch data
     }
     else if (Array.isArray(data)) {
       for (var d of data) {
@@ -29,17 +53,17 @@ var JsLoader = window.JsLoader = (function (window, document) {
       }
     }
     else if (typeof(data) === "object") {
-      let keys = Object.keys(data);
-
-      for (var k of keys) {
-        if (k === ".") {
-          _load(path, data[k]);   // get data in currently defined path
-        }
-        else if (k === "?") {
-          _fetch(path, data[k]);  // fetch data with config
-        }
-        else {
-          _load(path+k, data[k]); // append path before loading child data
+      if (data.hasOwnProperty("?")) {
+        promise_list.push( _fetch(path, data) );  // fetch data with config
+      }
+      else {
+        for (var k of Object.keys(data)) {
+          if (k === ".") {
+            _load(path, data[k]);   // get data in currently defined path
+          }
+          else {
+            _load(path+k, data[k]); // append path before loading child data
+          }
         }
       }
     }
@@ -51,28 +75,26 @@ var JsLoader = window.JsLoader = (function (window, document) {
   * @param root The full path to the js file
   * @param config The object describing the fetch configuration
   */
-  function _fetch (root, config) {
+  function _fetch(root, config) {
     if(!config) {
       config = { src: "" };   // Set default fetch config
     }
 
     if (config.hasOwnProperty("src")) {
       config._url = root + String(config.src);
-      let id = config.id || config._url;
+      let id = config["?"] || config._url;
 
       if (cache[id]) {
-        console.log("Required script already in cache");
         return cache[id];
       }
 
       let promise = _append(_script(config), document.head);
 
-      if(config.id || config.cache !== false) {
+      if(config["?"] || config.cache !== false) {
         cache[id] = promise;
       }
 
-      // return promise;
-      promise_list.push(promise);
+      return promise;
     }
   }
 
@@ -118,7 +140,8 @@ var JsLoader = window.JsLoader = (function (window, document) {
   }
 
   return  {
-    load: load
+    load: load,
+    require: require
   };
 
 })(window, window.document);

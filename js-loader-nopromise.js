@@ -5,22 +5,36 @@ var JsLoader = window.JsLoader = (function (window, document) {
   var callback = null;
   var cache = {};
 
-  function isReady () {
-    return script_count === 0;
-  }
-
-  function load (data) {
+  function load(data) {
     _load("", data);
-    return this;
+    return this;  // return this for chained call with 'then()'
   }
 
-  function then (f) {
+  function then(f) {
     if(typeof(f) == "function"){
       callback = f;
     }
   }
 
-  function _load (path, data) {
+  function require(key) {
+    if(typeof(key) !== "string") {
+      return;
+    }
+
+    if (cache[key]) {
+      return cache[key];
+    }
+    else {
+      _fetch("", {
+        src: key,
+        async: false
+      });
+      return cache[key];
+    }
+  }
+
+
+  function _load(path, data) {
     if (typeof(data) === "string") {
       _fetch(path+data);
     }
@@ -30,30 +44,31 @@ var JsLoader = window.JsLoader = (function (window, document) {
       }
     }
     else if (typeof(data) === "object") {
-      let keys = Object.keys(data);
-
-      for (var k of keys) {
-        if (k === ".") {
-          _load(path, data[k]);
-        }
-        else if (k === "?") {
-          _fetch(path, data[k]);
-        }
-        else {
-          _load(path+k, data[k]);
+      if (data.hasOwnProperty("?")) {
+        _fetch(path, data);
+      }
+      else {
+        for (var k of Object.keys(data)) {
+          if (k === ".") {
+            _load(path, data[k]);
+          }
+          else {
+            _load(path+k, data[k]);
+          }
         }
       }
+
     }
   }
 
-  function _fetch (root, config) {
+  function _fetch(root, config) {
     if(!config) {
       config = { src: "" };
     }
 
     if (config.hasOwnProperty("src")) {
       config._url = root + String(config.src);
-      let id = config.id || config._url;
+      let id = config["?"] || config._url;
 
       if (cache[id]) {
         console.log("Required script already in cache");
@@ -63,7 +78,7 @@ var JsLoader = window.JsLoader = (function (window, document) {
       let script = _script(config);
       _append(script, document.head);
 
-      if(config.id || config.cache !== false) {
+      if(config["?"] || config.cache !== false) {
         cache[id] = script;
       }
     }
@@ -79,7 +94,7 @@ var JsLoader = window.JsLoader = (function (window, document) {
         script.onload = script.onreadystatechange = null;
 
         script_count--
-        if(isReady()) {
+        if(_ready()) {
           _callback();
         }
       }
@@ -108,9 +123,14 @@ var JsLoader = window.JsLoader = (function (window, document) {
     }
   }
 
+  function _ready () {
+    return script_count === 0;
+  }
+
   return  {
     load: load,
     then: then,
+    require: require
   };
 
 })(window, window.document);
