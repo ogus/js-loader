@@ -6,10 +6,9 @@ var JsLoader = window.JsLoader = (function (window, document) {
 
   /**
   * Public function to load the javascript files
-  * @param data The data to load (a String, or an Array, or an Object, or any combinations of those)
-  * @param func The callback to apply
+  * @param {string|Array|Object} data Data to load
   */
-  function load(data, func) {
+  function load(data) {
     _load("", data);
     return Promise.all(promise_list);
   }
@@ -18,13 +17,9 @@ var JsLoader = window.JsLoader = (function (window, document) {
   * Public function to request a javascript files.
   * If the file has not been loaded in the cache, return the cached value,
   * otherwise fetch the script synchronously
-  * @param key The full path or the ID of the requested file
+  * @param key Path or ID of the requested file
   */
   function require(key) {
-    if(typeof(key) !== "string") {
-      return;
-    }
-
     if (cache[key]) {
       return Promise.resolve(cache[key]);
     }
@@ -40,8 +35,8 @@ var JsLoader = window.JsLoader = (function (window, document) {
 
   /**
   * Private functon that recursively loads the data.
-  * @param path The path the current data, progressively concatenated
-  * @param func The data to load (recursive concatenation of all path)
+  * @param path Path to the current data, progressively concatenated
+  * @param func Data to load (recursive concatenation of all path)
   */
   function _load(path, data) {
     if (typeof(data) === "string") {
@@ -72,8 +67,8 @@ var JsLoader = window.JsLoader = (function (window, document) {
   /**
   * Fetch the script described by its path and configuration,
   * and set a new promise to detect the load completion
-  * @param root The full path to the js file
-  * @param config The object describing the fetch configuration
+  * @param root Full path to the JS file
+  * @param config Object describing the fetch configuration
   */
   function _fetch(root, config) {
     if(!config) {
@@ -100,8 +95,8 @@ var JsLoader = window.JsLoader = (function (window, document) {
 
   /**
   * Append a script to a DOM element, and return a Promise for completion
-  * @param script The script to add
-  * @param el The document element on which the script will be attached
+  * @param script Js script that will be loaded
+  * @param el Document element on which the script will be attached
   */
   function _append(script, el) {
     return new Promise(function(resolve, reject) {
@@ -123,7 +118,7 @@ var JsLoader = window.JsLoader = (function (window, document) {
 
   /**
   * Create a script element from a configuration
-  * @param config The script configuration
+  * @param config Script configuration
   */
   function _script(config) {
     let s = config._url.split(".");
@@ -145,5 +140,3 @@ var JsLoader = window.JsLoader = (function (window, document) {
   };
 
 })(window, window.document);
-
-// https://github.com/MiguelCastillo/load-js/blob/master/src/load-js.js

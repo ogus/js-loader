@@ -30,7 +30,7 @@ It aims to avoid this kind of **nightmare**:
   </head>
 </html>
 ```
-> Just imagine 20 more `<script></script>` lines...
+> Just imagine 20 more `<script></script>` tags...
 
 
 ## Installation
