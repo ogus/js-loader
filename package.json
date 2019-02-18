@@ -1,0 +1,19 @@
+{
+  "name": "js-loader",
+  "version": "1.1.2",
+  "description": "A small tool to load Javascript sources in a browser context",
+  "author": "Ogus",
+  "license": "WTFPL",
+  "main": "src/js-loader.js",
+  "scripts": {
+    "build": "terser src/js-loader.js -c -m > src/js-loader.min.js"
+  },
+  "devDependencies": {
+    "terser": "^3.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ogus/js-loader.git"
+  },
+  "homepage": "https://github.com/ogus/js-loader#readme"
+}

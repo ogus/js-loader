@@ -1,9 +1,9 @@
 # JsLoader
 
-JsLoader is a utility tool that helps dynamically loading Javascript file in a DOM environment.
+JsLoader is a utility tool that helps dynamically to load Javascript source in a browser context.
 
 
-## Do you need it ?
+## Background
 
 This module is certainly a must-have in any of these situations:
 
@@ -11,7 +11,7 @@ This module is certainly a must-have in any of these situations:
 
  + You need to load new Javascript source at runtime
 
- + The url / path to your dependencies is unknown before a specific `.js` file is loaded
+ + The url to your dependencies is unknown before a specific `.js` file is loaded
 
 
 It aims to avoid this kind of **nightmare**:
@@ -35,48 +35,63 @@ It aims to avoid this kind of **nightmare**:
 
 ## Installation
 
-Just download/clone this repository anywhere to get the source files, and add a script tag that links to anywhere
+Download / clone this repository and add `js-loader.min.js` form the `src` directory in your own project.
+
+Then import the module as the first `<script>` tag
 
 ```html
-<script type="text/javascript" src="path/to/anywhere/js-loader.js"></script>
+<script type="text/javascript" src="path/to/js-loader.min.js"></script>
 ```
 
-That's it, you are ready to go !
+
+## Usage
+
+```js
+JsLoader.load("http://url/to/some/code.js");
+
+JsLoader.load("path/to/script");
+
+JsLoader.load({
+  "dir1/": ["file1", "file2", "file3"],
+  "dir2/": {
+    ".": "hello.js",
+    "child/": [ "foo", "bar", "sub/script"]
+  }
+}).then(function () {
+  // do something after all scripts are loaded
+});
+```
 
 
 ## Features
 
-It provides a *static* class named `JsLoader`, associated with two public function.
+The script provides a *static* class `JsLoader`, with two public methods.
 
-The `load()` function allows to load JS files passed in arguments, and returns a new `Promise` containing every loaded script, so you can chain it easily.  
-The *nopromise* version also allows chaining by returning the JsLoader object and defining a `then()` that accept a function as argument.
+The `JsLoader.load(args)` function allows to load JS files passed in arguments, and returns a new `Promise` containing every loaded script, so you can chain it easily.
 
-The `require()` function allows to require a script that has been previously loaded, and return it. If the script has not been loaded, it load it synchronously.
+The `JsLoader.require(script)` function allows to query a script that has been previously loaded, and return it. If the script has not been loaded yet, it will be loaded synchronously.
 
-The structure of the `load()` arguments has been made as permissive as possible. It can accept a **String**, an **Array**, or an **Object** where the *keys* will be used as directory name (see the [examples](#code-example)).  
-You can even mix any of those argument, everything should work ! And if does not, you can happily open a new issue ;)
+### `JsLoader.load(args)`
 
+The structure of the method arguments has been made as permissive as possible.
 
-## Code Example
+You can use a `String`, an `Array`, an `Object` with *keys* as directory name, or a mix of all of this argument types.
 
-### File Loading
+*Note:* The `.js` extension will automatically be added to any script if it is missing (so you can save up to 0.017s of your time).
 
 #### String
 
-It can be the path to a saved file, or the url to a hosted file.  
-Don't worry about the `.js` extension, it's optionnal so you can save up to 0.017s of your time.
+`args` can be a `String` describing the path to a saved file, or the url to a hosted file.
 
 ```js
-// this is valid;
 JsLoader.load("http://url/to/some/code.js");
 
-// this is aslo valid, it will load 'path/to/script.js'
-JsLoader.load("path/to/script");
+JsLoader.load("path/to/script");  // load 'path/to/script.js'
 ```
 
 #### Array
 
-You can use an Array structure to list all your files
+`args` can be an `Array` structure to list all your files
 
 ```js
 JsLoader.load(["file1.js", "src/file2.js"]);
@@ -90,8 +105,9 @@ JsLoader.load([
 
 #### Object
 
-This JSON-like structure can be used to avoid writing repetitively the path to a directory containing several scripts.  
-The keys of the object are used as directory name, and concatenated until the file name
+`args` can be a *JSON*-like structure, to avoid writing repetitively the path to a directory containing several scripts.
+
+Each keys of the object is used as a sub-directory name, and each value is used as a file name
 
 ```js
 JsLoader.load({
@@ -103,7 +119,9 @@ JsLoader.load({
 });
 ```
 
-There are also two specific keys that can be used: `"."` and `"?"`.
+#### Reserved Object key: `"."`
+
+There are two specific keys with special properties for an `Object`: `"."` and `"?"`
 
 
 The `"."` key is used to indicate the current directory in the file tree.
@@ -117,37 +135,33 @@ JsLoader.load({
 });
 ```
 
-The `"?"` key is used to indicate the configuration of the file to load.  
-When an object possess this key, it will be read as the script identifier and the loader will search for other configuration parameters.
+#### Reserved Object key: `"?"`
 
-When passing the `"?"` key, its value can be set as an empty string to avoid passing an ID
+The `"?"` key is used to set up the configuration of a specific file to load.
 
-> An object can not indicate a directory AND the configuration of a script
+When this key appears in the file tree sctructure, the value is expected to be a single object defining various parameters
+The loader will looks for the following parameters:
 
-The loader will consider for the following keys:
-
- + `?`: *String*, ID of the file. Useful to `require()` it later
  + `src`: *String*, path to the file (relative to the file tree) **REQUIRED**
+ + `id`: *String*, ID of the file. Useful to `require()` it later
  + `cache`: *Boolean*, set to true to enable cache storage (default: true)
  + `async`: *Boolean*, set to true to enable async script loading (default: false)
  + `type`: *String*, the MIME type of the file (default: "text/javascript")
-
 
 ```js
 JsLoader.load({
   "directory/": {
     "foo/": "file.js",
-    "bar/": {
-      "?": "",            // no ID povided
-      src: "file2.js",    // load "directory/bar/file2.js"
-      async: false,       // synchronously
+    "?": {
+      src: "bar/file2.js",  // load "directory/bar/file2.js"
+      async: false,         // synchronously
     },
   },
-  "buzz/": {
-    src: "path/to/lightning",   // load "buzz/path/to/lightning.js"
-    "?": "light",               // as "light"
-    cache: true                 // with cache storage (this is default)
-  }
+  "buzz/": {"?" : {
+    src: "path/to/lightning",  // load "buzz/path/to/lightning.js"
+    id: "light",               // as "light"
+    cache: false               // without cache storage
+  }}
 });
 ```
 
@@ -205,30 +219,9 @@ letters/a.js, letters/b.js, letters/c.js, letters/d.js,
 letters/e.js, letters/f/g.js, letters/f/h.js
 */
 ```
-
 Notice how the Array inside another Array does not add a sub-directory. You might never use it, but who knows...
 
 
-### Chain Execution
-
-The `load()` function returns a `Promise`, that can be used to wait for the loading to finish.
-
-```js
-JsLoader.load({...}).then(function () {
-  // do something
-});
-```
-
-```js
-function foo() {
-  // do something
-}
-
-JsLoader.load({...}).then(foo);
-```
-
-The function `foo()` will only be executed when the JsLoader has finished working.
-
 ## License
 
-Not yet
+This project is licensed under the WTFPL - see [LICENSE](LICENSE) for more details
