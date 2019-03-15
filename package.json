@@ -6,10 +6,12 @@
   "license": "WTFPL",
   "main": "src/js-loader.js",
   "scripts": {
-    "build": "terser src/js-loader.js -c -m > src/js-loader.min.js"
+    "build-es5": "uglifyjs src/js-loader-es5.js -c -m -o src/js-loader-es5.min.js",
+    "build-es6": "terser src/js-loader.js -c -m > src/js-loader.min.js"
   },
   "devDependencies": {
-    "terser": "^3.9.2"
+    "terser": "^3.9.2",
+    "uglify-js": "^3.4.9"
   },
   "repository": {
     "type": "git",
