@@ -84,7 +84,7 @@ var JsLoader = (function (window, document) {
     }
     var script = document.createElement("script");
     script.src = src;
-    script.type = confi['type'] || "text/javascript";
+    script.type = config['type'] || "text/javascript";
     script.async = !!config['async'];
     return script;
   }
